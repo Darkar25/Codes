@@ -1,5 +1,5 @@
-Код для тени на ListView
+РљРѕРґ РґР»СЏ С‚РµРЅРё РЅР° ListView
 
-Морблок:
+РњРѕСЂР±Р»РѕРє:
 Number:transLayersNum
 ListView:listviee
