@@ -21,29 +21,29 @@ class GraphView {
     vertical.add(0);
     vertical.add(1);
   }
-  public void add(float value) { //<>//
-    arr.add(value); //<>//
-    if(!isNull(horizontal,horizontal.size()-1)) { //<>//
-      if(horizontal.size()<width/(textsize+textoffset)) { //<>//
-        horizontal.add(horizontal.get(horizontal.size()-1)+1); //<>// //<>//
-      } else { //<>//
-        int vall = horizontal.get(horizontal.size()-1)+1; //<>// //<>//
-        int size2 = horizontal.size()+1; //<>//
-        horizontal = split(size2,vall); //<>//
-      } //<>//
-    } else { //<>//
-      horizontal.add(1); //<>//
-    } //<>//
-    if(vertical.get(0)<value) { //<>// //<>//
-      int size; //<>//
-      if(value>=5) { //<>//
-        size = 5; //<>//
-      } else { //<>//
-        size = (int)value; //<>//
-      } //<>//
-      vertical = split(size,(int)value); //<>// //<>// //<>// //<>// //<>//
-    } //<>//
-  } //<>//
+  public void add(float value) {
+    arr.add(value);
+    if(!isNull(horizontal,horizontal.size()-1)) {
+      if(horizontal.size()<width/(textsize+textoffset)) {
+        horizontal.add(horizontal.get(horizontal.size()-1)+1);
+      } else {
+        int vall = horizontal.get(horizontal.size()-1)+1;
+        int size2 = horizontal.size()+1;
+        horizontal = split(size2,vall);
+      }
+    } else {
+      horizontal.add(1);
+    }
+    if(vertical.get(0)<value) {
+      int size;
+      if(value>=5) {
+        size = 5;
+      } else {
+        size = (int)value;
+      }
+      vertical = split(size,(int)value);
+    }
+  }
   public void print() {
     println("---DEBUG INFO---");
     println("Graph Name:"+this);
