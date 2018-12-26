@@ -14,7 +14,6 @@ void setup() {
   graph.add(40);
   graph.add(32);
   graph.draw();
-  image(graph.rendered,0,0);
 }
 
 void draw() {
