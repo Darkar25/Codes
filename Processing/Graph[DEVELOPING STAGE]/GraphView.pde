@@ -7,6 +7,7 @@ class GraphView {
   public float height;
   public float x;
   public float y;
+  public boolean debug = false;
   public ArrayList<Float> arr = new ArrayList<Float>();
   private ArrayList<PVector> value_coords = new ArrayList<PVector>();
   private ArrayList<PVector> value_data = new ArrayList<PVector>();
@@ -17,6 +18,8 @@ class GraphView {
   private int textsize = 0;
   private int textoffset = 5;
   protected boolean cycleready = false;
+  private boolean hovered = false;
+  private boolean errored = false;
   //>
   public GraphView(float x,float y,float width,float height,ArrayList<Float> arr) {
     this.width = width;
@@ -61,7 +64,7 @@ class GraphView {
         horiz_coords.add(new PVector(i*((this.width-textsize/textoffset)/horizontal.size()),this.height+textsize-textoffset));
       }
     }
-    for(int i = 1;i<arr.size();i++) {
+    for(int i = 1;i<horizontal.size();i++) {
       for(int j = 1;j<vertical.size();j++) {
         //Проверка диапазона в котором находится значение
         if(value<vertical.get(j-1)&&value>vertical.get(j)) {
@@ -130,46 +133,60 @@ class GraphView {
     rendered.endDraw();
     image(this.rendered,this.x,this.y);
     cycleready = true;
-    this.print();
+    if(debug) {
+      this.print();
+    }
   }
   public void onHoverCycle() {
     if(cycleready) {
-      rendered.clear();
       PGraphics graphic = createGraphics((int)this.width,(int)this.height);
-      PGraphics mouserect = createGraphics(30,30);
+      PGraphics mouserect = createGraphics(10,10);
       graphic.beginDraw();
-      mouserect.beginDraw();
-      mouserect.fill(255,255,255,127);
-      mouserect.rect(0,0,30,30);
+      if(debug) {
+        mouserect.beginDraw();
+        mouserect.fill(255,127,255,127);
+        mouserect.rect(0,0,10,10,25);
+        mouserect.endDraw();
+      }
       for(int i = 0;i < value_coords.size();i++) {
         PVector vec = (PVector)value_coords.get(i);
         if(mouseX<vec.x+15&&mouseX>vec.x+5&&mouseY<vec.y+15&&mouseY>vec.y+5) {
-          image(rendered,x,y);
-          String str = "Line:"+(int)value_data.get(i).x+" Collumn:"+(int)value_data.get(i).y;
+          hovered = true;
+          String str;
+          if(!isNull(value_data,i)) {
+            str = "Line:"+(int)value_data.get(i).x+" Collumn:"+(int)value_data.get(i).y;
+          } else {
+            str = "Line:N/A Collumn:N/A";
+            if(hovered && !errored) {
+              println("Cannot validate point at position " + i + "!Maybe code-level bug?Contact me vk.com/gushser");
+              errored = true;
+            }
+          }
           graphic.fill(0,0,0,127);
           float val = ((textsize/3.5)*str.length()+width/10)/1.75;
           float val2 = textsize+textoffset;
           if(vec.x+val-width/(width/val*PI)<width) {
-            graphic.rect(vec.x-3-val2,vec.y,val,height/15,25,25,25,25);
+            graphic.rect(vec.x-3-val2,vec.y,val,height/15,25);
             graphic.textSize(textsize/3.5);
             graphic.fill(255);
             graphic.text(str,vec.x+27-val2-(str.length()/textsize+textoffset),vec.y+15);
           } else {
-            graphic.rect(vec.x+25-val2,vec.y,-val,height/15,25,25,25,25);
+            graphic.rect(vec.x+25-val2,vec.y,-val,height/15,25);
             graphic.textSize(textsize/3.5);
             graphic.fill(255);
             graphic.text(str,vec.x+5-(5*str.length()+width/10)-val2-(str.length()/textsize+textoffset),vec.y+15);
           }
           graphic.fill(0,255,255);
-          graphic.rect(vec.x+5-val2,vec.y+5,10,10,25,25,25,25);
-        } else {
-          image(rendered,x,y);
+          graphic.rect(vec.x+5-val2,vec.y+5,10,10,25);
+        } else if(!isHovered(value_coords)) {
+          hovered = false;
+          errored = false;
         }
       }
+      graphic.image(mouserect,mouseX-(textsize+textoffset+5),mouseY-5);
       graphic.endDraw();
-      mouserect.endDraw();
-      rendered.image(graphic,x+textsize+textoffset,y);
-      rendered.image(mouserect,mouseX-15,mouseY-15);
+      image(rendered,x,y);
+      image(graphic,x+textsize+textoffset,y);
     }
   }
   //Разбиение числа на равные части
@@ -180,6 +197,16 @@ class GraphView {
       }
       Collections.reverse(ret);
       return ret;
+  }
+  private boolean isHovered(ArrayList<PVector> arr) {
+    boolean ret = false;
+    for(int i = 0;i < arr.size();i++) {
+       PVector vec = (PVector)value_coords.get(i);
+       if(mouseX<vec.x+15&&mouseX>vec.x+5&&mouseY<vec.y+15&&mouseY>vec.y+5) {
+         ret = true;
+       }
+    }
+    return ret;
   }
   //Проверка если значение NULL или выходит за пределы списка
   private boolean isNull(ArrayList arr,int index) {
