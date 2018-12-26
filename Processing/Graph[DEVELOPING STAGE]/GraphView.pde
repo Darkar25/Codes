@@ -1,6 +1,7 @@
 import java.util.*;
 
 class GraphView {
+  //Объявление переменных <
   public PGraphics rendered;
   public float width;
   public float height;
@@ -16,6 +17,7 @@ class GraphView {
   private int textsize = 0;
   private int textoffset = 5;
   protected boolean cycleready = false;
+  //>
   public GraphView(float x,float y,float width,float height,ArrayList<Float> arr) {
     this.width = width;
     this.height = height;
@@ -49,35 +51,46 @@ class GraphView {
     vert_coords = new ArrayList<PVector>();
     horiz_coords = new ArrayList<PVector>();
     value_coords = new ArrayList<PVector>();
+    //Установка координат для вертикальной линии
     for(int i = 1;i < vertical.size()+1;i++) {
       vert_coords.add(new PVector(0,i*((this.height-textoffset)/vertical.size())-textsize/2));
     }
+    //Установка координат для горизонтальной линии
     for(int i = 1;i < horizontal.size();i++) {
       if(!isNull(horizontal,i-1)) {
         horiz_coords.add(new PVector(i*((this.width-textsize/textoffset)/horizontal.size()),this.height+textsize-textoffset));
       }
     }
     for(int i = 1;i<arr.size();i++) {
-      if(horiz_coords.size()>0) {
-        value_coords.add(new PVector(horiz_coords.get(i-1).x,compare(vertical,vert_coords,arr.get(i-1))));
-      }
-      if(i >= horiz_coords.size()) {
-        value_coords.add(new PVector(horiz_coords.get(horiz_coords.size()-1).x,compare(vertical,vert_coords,value)));
+      for(int j = 1;j<vertical.size();j++) {
+        //Проверка диапазона в котором находится значение
+        if(value<vertical.get(j-1)&&value>vertical.get(j)) {
+          //Если список значений НЕ пуст
+          if(horiz_coords.size()>0) {
+            //Установка координаты для последней точки в списке
+            value_coords.add(new PVector(horiz_coords.get(i-1).x,calculatePoint(vertical.get(j-1),vertical.get(j),arr.get(arr.size()-1),vert_coords.get(j-1),vert_coords.get(j)).y));
+          }
+          //Если список значений пуст
+          if(i >= horiz_coords.size()) {
+            //Установка координаты для текущей точки
+            value_coords.add(new PVector(horiz_coords.get(horiz_coords.size()-1).x,calculatePoint(vertical.get(j-1),vertical.get(j),value,vert_coords.get(j-1),vert_coords.get(j)).y));
+          }
+        }
       }
     }
   }
   public void print() {
     println("---DEBUG INFO---");
-    println("Graph Name:"+this);
-    println("Graph Coordinates:"+this.x+" "+this.y);
-    println("Graph Dimensions:"+this.width+" "+this.height);
-    println("Values Coordinates:"+PVectorArrayToString(value_coords));
-    println("Values Data:"+PVectorArrayToString(value_data));
-    println("Lines Coordinates:"+PVectorArrayToString(vert_coords));
-    println("Collumns Coordinates:"+PVectorArrayToString(horiz_coords));
-    println("Values:"+arr.toString());
-    println("Lines:"+vertical.toString());
-    println("Collumns:"+horizontal.toString());
+    println("Айди графика:"+this);
+    println("Координаты графика:"+this.x+" "+this.y);
+    println("Размеры графика:"+this.width+" "+this.height);
+    println("Координаты точек:"+PVectorArrayToString(value_coords));
+    println("Данные точек:"+PVectorArrayToString(value_data));
+    println("Координаты вертикальной линии:"+PVectorArrayToString(vert_coords));
+    println("Координаты горизонтальной линии:"+PVectorArrayToString(horiz_coords));
+    println("Точки:"+arr.toString());
+    println("Линии:"+vertical.toString());
+    println("Колонны:"+horizontal.toString());
     println("---DEBUG INFO---");
   }
   public void draw() {
@@ -85,6 +98,7 @@ class GraphView {
     rendered = createGraphics((int)(this.width+textsize+textoffset),(int)(this.height+textsize+textoffset));
     rendered.beginDraw();
     rendered.rect(x+textsize+textoffset*2,y,x+this.width,y+this.height);
+    //Отрисовка вертикального текста и линий
     for(int i = 1;i < vertical.size()+1;i++) {
       rendered.textSize(textsize);
       rendered.fill(0);
@@ -93,6 +107,7 @@ class GraphView {
       rendered.line(x+textsize+textoffset*2,i*((this.height-textoffset)/vertical.size())-textsize/2,x+textsize+textoffset*2+this.width,i*((this.height-PI)/vertical.size())-textsize/2);
       vert_coords.add(new PVector(0,i*((this.height-textoffset)/vertical.size())-textsize/2));
     }
+    //Отрисовка горизонтального текста
     for(int i = 1;i < horizontal.size()+1;i++) {
       rendered.textSize(textsize);
       rendered.fill(0);
@@ -100,28 +115,32 @@ class GraphView {
         rendered.text(horizontal.get(i-1).toString(),i*((this.width-textsize/textoffset)/horizontal.size()),this.height+textsize-textoffset);
       }
     }
+    //Отрисовка точек
     for(int i = 1;i < value_coords.size()+1;i++) {
       if(!isNull(value_coords,i)) {
         rendered.stroke(0,255,0);
         rendered.strokeWeight(3);
         rendered.line(value_coords.get(i).x+10,value_coords.get(i).y+10,value_coords.get(i-1).x+10,value_coords.get(i-1).y+10);
+        rendered.fill(0,255,0);
+        rendered.strokeWeight(1);
+        rendered.stroke(0);
+        rendered.rect(value_coords.get(i-1).x+5,value_coords.get(i-1).y+5,10,10,25);
       }
     }
-    for(int i = 1;i < value_coords.size()+1;i++) {
-      rendered.fill(0,255,0);
-      rendered.strokeWeight(1);
-      rendered.stroke(0);
-      rendered.rect(value_coords.get(i-1).x+5,value_coords.get(i-1).y+5,10,10,25,25,25,25);
-    }
     rendered.endDraw();
+    image(this.rendered,this.x,this.y);
     cycleready = true;
     this.print();
   }
   public void onHoverCycle() {
     if(cycleready) {
+      rendered.clear();
       PGraphics graphic = createGraphics((int)this.width,(int)this.height);
+      PGraphics mouserect = createGraphics(30,30);
       graphic.beginDraw();
-      //graphic.rect(mouseX-25,mouseY-25,50,50);
+      mouserect.beginDraw();
+      mouserect.fill(255,255,255,127);
+      mouserect.rect(0,0,30,30);
       for(int i = 0;i < value_coords.size();i++) {
         PVector vec = (PVector)value_coords.get(i);
         if(mouseX<vec.x+15&&mouseX>vec.x+5&&mouseY<vec.y+15&&mouseY>vec.y+5) {
@@ -148,9 +167,12 @@ class GraphView {
         }
       }
       graphic.endDraw();
-      image(graphic,x+textsize+textoffset,y);
+      mouserect.endDraw();
+      rendered.image(graphic,x+textsize+textoffset,y);
+      rendered.image(mouserect,mouseX-15,mouseY-15);
     }
   }
+  //Разбиение числа на равные части
   private ArrayList<Integer> split(int size,int val) {
     ArrayList<Integer> ret = new ArrayList<Integer>();
       for(int i = 1;i < size+1;i++) {
@@ -159,6 +181,7 @@ class GraphView {
       Collections.reverse(ret);
       return ret;
   }
+  //Проверка если значение NULL или выходит за пределы списка
   private boolean isNull(ArrayList arr,int index) {
     boolean ret = false;
     try {
@@ -170,6 +193,7 @@ class GraphView {
     }
     return ret;
   }
+  //Перевод PVector списка в строку
   public String PVectorArrayToString(ArrayList<PVector> arr) {
     final StringBuilder str = new StringBuilder();
     str.append("[");
@@ -186,16 +210,11 @@ class GraphView {
     str.append("]");
     return str.toString();
   }
-  private float compareTo(float to,float from, float max) {
-    return from/max*to;
-  }
-  private float compare(ArrayList<Integer> arr,ArrayList<PVector> arr1,float value) {
-    float comp = 0;
-    for(int j = 1;j<arr.size();j++) {
-      if(value>arr.get(j)&&value<=arr.get(j-1)) {
-          comp = compareTo(arr.get(j-1),arr1.get(j).y,arr1.get(j-1).y);
-      }
-    }
-    return comp;
+  //Рассчёт координаты Y для точки
+  private PVector calculatePoint(float From,float To,float Point,PVector A,PVector B) {
+    float lambda = abs(From-Point)/abs(Point+To);
+    float X = (A.x+lambda*B.x)/1+lambda;
+    float Y = (A.y+lambda*B.y)/1+lambda;
+    return new PVector(X,Y);
   }
 }
