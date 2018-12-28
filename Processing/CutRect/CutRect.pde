@@ -2,10 +2,12 @@ public void cutRect(float x,float y,float w,float h,float c) {
   if(!(c>w/2||c>h/2)) {
     beginShape();
     vertex(x+c,y);
-    vertex(x+w,y);
+    vertex(x+w-c,y);
+    vertex(x+w,y+c);
     vertex(x+w,y+h-c);
     vertex(x+w-c,y+h);
-    vertex(x,y+h);
+    vertex(x+c,y+h);
+    vertex(x,y+h-c);
     vertex(x,y+c);
     vertex(x+c,y);
     endShape();
